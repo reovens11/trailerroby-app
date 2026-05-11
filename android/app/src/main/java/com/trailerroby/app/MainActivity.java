@@ -24,7 +24,7 @@ public class MainActivity extends BridgeActivity {
     private static final int NOTIFICATION_PERMISSION_REQUEST = 2;
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
 
         // Request notification permission on Android 13+
