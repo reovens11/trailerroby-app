@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: "TrailerRoby",
   webDir: "www",
   server: {
-    url: "https://traileroby.com",
+    url: "https://track-six.vercel.app",
     cleartext: false,
     androidScheme: "https",
   },
