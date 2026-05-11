@@ -27,9 +27,10 @@ function chunk(type, data) {
 }
 
 function makePNG(size) {
-  const bg = [30, 58, 138]; // #1e3a8a blue
+  const bg   = [29, 78, 216];   // #1d4ed8 bright blue
+  const dark = [3, 7, 18];      // near-black outside corners
   const white = [255, 255, 255];
-  const radius = Math.round(size * 0.22); // rounded corners
+  const radius = Math.round(size * 0.22);
 
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(size, 0);
@@ -44,68 +45,54 @@ function makePNG(size) {
       const nx = x / size;
       const ny = y / size;
 
-      // Rounded corners — pixels outside get dark background
+      // Rounded corners
       let inRounded = true;
       const r = radius;
-      const checks = [[r, r], [size - r - 1, r], [r, size - r - 1], [size - r - 1, size - r - 1]];
-      for (const [cx, cy] of checks) {
+      const corners = [[r, r], [size-r-1, r], [r, size-r-1], [size-r-1, size-r-1]];
+      for (const [cx, cy] of corners) {
         if (x <= cx && y <= cy && (x < cx - r || y < cy - r)) {
           const dx = x - cx, dy = y - cy;
-          if (dx * dx + dy * dy > r * r) { inRounded = false; break; }
+          if (dx*dx + dy*dy > r*r) { inRounded = false; break; }
         }
       }
 
-      if (!inRounded) {
-        raw.push(3, 7, 18);
-        continue;
-      }
+      if (!inRounded) { raw.push(...dark); continue; }
 
-      // Truck icon:
-      // Body (cargo box): left 15%–67%, top 35%–68%
-      const inBody = nx >= 0.15 && nx <= 0.67 && ny >= 0.34 && ny <= 0.68;
+      // ── "P" letter ──────────────────────────────────────
+      // Vertical bar
+      const inBar = nx >= 0.27 && nx <= 0.42 && ny >= 0.13 && ny <= 0.76;
 
-      // Cab: right 67%–88%, top 34%–68% with slanted front
-      // slant: top goes from (0.67, 0.34) to (0.88, 0.46), bottom flat at 0.68
-      const cabSlant = 0.34 + ((nx - 0.67) / (0.88 - 0.67)) * (0.46 - 0.34);
-      const inCab = nx >= 0.67 && nx <= 0.88 && ny >= cabSlant && ny <= 0.68;
+      // Bump: outer ellipse minus inner ellipse, right of bar, upper half
+      const bCx = 0.42, bCy = 0.36;
+      const dOuter = ((nx - bCx) / 0.25) ** 2 + ((ny - bCy) / 0.23) ** 2;
+      const dInner = ((nx - bCx) / 0.12) ** 2 + ((ny - bCy) / 0.11) ** 2;
+      const inBump = dOuter <= 1 && dInner > 1
+                  && nx >= 0.42 && ny >= 0.13 && ny <= 0.59;
 
-      // Cab window: inside cab, top portion
-      const winSlant = 0.36 + ((nx - 0.685) / (0.84 - 0.685)) * (0.455 - 0.36);
-      const inWindow = nx >= 0.685 && nx <= 0.84 && ny >= winSlant && ny <= 0.56;
+      // ── Truck + trailer (bottom strip) ──────────────────
+      // Trailer (long box, left)
+      const inTrailer = nx >= 0.09 && nx <= 0.54 && ny >= 0.81 && ny <= 0.91;
 
-      // Rear wheels: two circles
-      const rw = size * 0.09;
-      const ry = size * 0.73;
-      const rx1 = size * 0.28;
-      const rx2 = size * 0.54;
-      const d1 = (x - rx1) ** 2 + (y - ry) ** 2;
-      const d2 = (x - rx2) ** 2 + (y - ry) ** 2;
-      const inWheel = d1 <= rw * rw || d2 <= rw * rw;
+      // Cab body (shorter, right)
+      const inCab = nx >= 0.57 && nx <= 0.87 && ny >= 0.81 && ny <= 0.91;
 
-      // Wheel hubs (inner circles, dark)
-      const hw = size * 0.04;
-      const inHub = (x - rx1) ** 2 + (y - ry) ** 2 <= hw * hw ||
-                    (x - rx2) ** 2 + (y - ry) ** 2 <= hw * hw;
+      // Cab slanted roof
+      const roofTop = 0.81 - ((nx - 0.57) / (0.87 - 0.57)) * 0.11;
+      const inRoof = nx >= 0.57 && nx <= 0.87 && ny >= roofTop && ny <= 0.81;
 
-      // "P" letter on body: left bar + arc
-      const pLeft = nx >= 0.22 && nx <= 0.32 && ny >= 0.38 && ny <= 0.64;
-      const pArcCx = 0.38, pArcCy = 0.47, pArcRx = 0.09, pArcRy = 0.10;
-      const pArcOuter = ((nx - pArcCx) / pArcRx) ** 2 + ((ny - pArcCy) / pArcRy) ** 2 <= 1;
-      const pArcInner = ((nx - pArcCx) / (pArcRx * 0.45)) ** 2 + ((ny - pArcCy) / (pArcRy * 0.45)) ** 2 <= 1;
-      const pArc = pArcOuter && !pArcInner && ny >= 0.38 && ny <= 0.56 && nx >= 0.28;
+      // Wheels (3 circles)
+      const wr = size * 0.048;
+      const wy = size * 0.945;
+      const inWheel =
+        (x - size*0.21)**2 + (y - wy)**2 <= wr*wr ||
+        (x - size*0.43)**2 + (y - wy)**2 <= wr*wr ||
+        (x - size*0.72)**2 + (y - wy)**2 <= wr*wr;
 
-      if (inHub) {
-        raw.push(...bg);
-      } else if (inWheel) {
-        raw.push(15, 23, 42); // dark wheel
-      } else if (inWindow) {
-        raw.push(147, 197, 253); // light blue window
-      } else if (inBody || inCab) {
-        if (pLeft || pArc) {
-          raw.push(255, 255, 255); // white P
-        } else {
-          raw.push(...white);
-        }
+      // Hitch between trailer and cab
+      const inHitch = nx >= 0.54 && nx <= 0.57 && ny >= 0.85 && ny <= 0.89;
+
+      if (inBar || inBump || inTrailer || inCab || inRoof || inWheel || inHitch) {
+        raw.push(...white);
       } else {
         raw.push(...bg);
       }
