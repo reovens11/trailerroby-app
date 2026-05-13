@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "839160493584",
+    "project_id": "trailerroby-ab24f",
+    "storage_bucket": "trailerroby-ab24f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:839160493584:android:1f0fdea84e68696fb5bc95",
+        "android_client_info": {
+          "package_name": "com.trailerroby.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJSuA1uAVTwph9QCkHlxhcpIJMybdeq6U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

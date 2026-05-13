@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:layoutDirection="rtl">
+
+    <TextView
+        android:id="@+id/alert_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🚨 התראת תנועה"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:paddingBottom="16dp" />
+
+    <TextView
+        android:id="@+id/alert_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textAlignment="center"
+        android:textColor="#E2E8F0"
+        android:lineSpacingMultiplier="1.4"
+        android:paddingBottom="24dp"
+        android:minLines="2" />
+
+    <Button
+        android:id="@+id/alert_ok"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="אישור"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#1D4ED8" />
+
+</LinearLayout>
