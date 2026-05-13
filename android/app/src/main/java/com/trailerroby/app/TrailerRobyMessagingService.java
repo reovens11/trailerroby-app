@@ -6,7 +6,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.provider.Settings;
 import androidx.core.app.NotificationCompat;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -76,13 +75,7 @@ public class TrailerRobyMessagingService extends FirebaseMessagingService {
         alertIntent.putExtra("body", body);
         alertIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        // אם יש הרשאת SYSTEM_ALERT_WINDOW — פתח Activity ישירות (חסום מסך באמצע)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(this)) {
-            startActivity(alertIntent);
-            return;
-        }
-
-        // גיבוי: notification עם full-screen intent (לכאשר מסך כבוי)
+        // notification עם full-screen intent
         PendingIntent fsPendingIntent = PendingIntent.getActivity(
             this, 1001, alertIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
